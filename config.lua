@@ -13,13 +13,49 @@ Config.Plants = {
         minReward = 1,                              -- Minimum reward per plant (optional, defaults to 1!)
         maxReward = 5                               -- Maximum reward per plant (optional, defaults to 1!)
     },
-    {                                               -- Follow this format exactly when adding in new world plants
-        hash = joaat("s_indiantobacco01x"),        -- Plant name as a hash value
-        name = "Indian Tobbaco",                        -- Plant name to be displayed in prompt
-        reward = "Indian_Tobbaco",                      -- Plant db reward item
-        minReward = 1,                              -- Minimum reward per plant (optional, defaults to 1!)
-        maxReward = 5                               -- Maximum reward per plant (optional, defaults to 1!)
+    { 
+        hash = joaat("s_indiantobacco01x"),
+        name = "Indian Tobbaco",
+        reward = "Indian_Tobbaco",
+        minReward = 1, 
+        maxReward = 5
+    },
+    {                                   
+        hash = joaat("p_tree_apple_01"),       
+        name = "Apple",                     
+        reward = "apple",                   
+        minReward = 1,                          
+        maxReward = 5                              
+    },
+    {                                              
+        hash = joaat("crp_tobaccoplant_ac_sim"),        
+        name = "Guarma Tobacco",                        
+        reward = "Guarma_Tobacco",                      
+        minReward = 1,                             
+        maxReward = 5                             
+    },
+    {
+        hash = joaat("crp_wheat_dry_aa_sim"),
+        name = "Grain",
+        reward = "Grain",
+        minReward = 1,
+        maxReward = 5  
+    },
+    {                                             
+        hash = joaat("rdr_bush_agave_aa_sim"),       
+        name = "Agave",                        
+        reward = "Agave",                     
+        minReward = 1,                              
+        maxReward = 5                             
+    },
+    {                                             
+        hash = joaat("crp_sugarcane_ac_sim"),       
+        name = "Sugarcane",                        
+        reward = "sugar",                     
+        minReward = 1,                              
+        maxReward = 5                             
     }
+
 }
 
 -- Default locations. Feel free to add more, just follow the existing template. Leave blank to not have any plants or prompts spawn.
