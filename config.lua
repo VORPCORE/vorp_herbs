@@ -20,36 +20,42 @@ Config.Plants = {
         minReward = 1, 
         maxReward = 5
     },
-        {                                      
+    {                                   
         hash = joaat("p_tree_apple_01"),       
         name = "Apple",                     
         reward = "apple",                   
         minReward = 1,                          
         maxReward = 5                              
     },
-        },
-        {                                              
+    {                                              
         hash = joaat("crp_tobaccoplant_ac_sim"),        
         name = "Guarma Tobacco",                        
         reward = "Guarma_Tobacco",                      
         minReward = 1,                             
         maxReward = 5                             
     },
-     },
-        { 
+    {
         hash = joaat("crp_wheat_dry_aa_sim"),
         name = "Grain",
         reward = "Grain",
         minReward = 1,
         maxReward = 5  
     },
-        {                                             
+    {                                             
         hash = joaat("rdr_bush_agave_aa_sim"),       
         name = "Agave",                        
-        reward = "rdr_bush_agave_aa_sim",                     
+        reward = "Agave",                     
         minReward = 1,                              
         maxReward = 5                             
     },
+    {                                             
+        hash = joaat("crp_sugarcane_ac_sim"),       
+        name = "Sugarcane",                        
+        reward = "sugar",                     
+        minReward = 1,                              
+        maxReward = 5                             
+    }
+
 }
 
 -- Default locations. Feel free to add more, just follow the existing template. Leave blank to not have any plants or prompts spawn.
