@@ -4,6 +4,8 @@ Config.MinimumDistance = 2.0 -- Minimum distance required to enable prompts for 
 
 Config.Timeout = 2           -- Timeout (in minutes)
 
+Config.ShowUsedNodePrompt = true    -- Show greyed out prompt on used nodes
+
 -- Pre-spawned plants to check for. Leave blank to not have any prompts spawn on world objects.
 Config.Plants = {
     {                                               -- Follow this format exactly when adding in new world plants

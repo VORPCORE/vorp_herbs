@@ -136,7 +136,7 @@ CreateThread(function()
 				GroupName = CreateVarString(10, "LITERAL_STRING", GroupName)
 				PromptSetActiveGroupThisFrame(Group, GroupName)
 				PromptSetEnabled(Prompt, false)
-				PromptSetVisible(Prompt, true)
+				PromptSetVisible(Prompt, Config.ShowUsedNodePrompt)
 
 				print("test")
 			end
@@ -194,7 +194,7 @@ CreateThread(function()
 						GroupName = CreateVarString(10, "LITERAL_STRING", GroupName)
 						PromptSetActiveGroupThisFrame(Group, GroupName)
 						PromptSetEnabled(Prompt, false)
-						PromptSetVisible(Prompt, true)
+						PromptSetVisible(Prompt, Config.ShowUsedNodePrompt)
 					end
 				end
 			end
