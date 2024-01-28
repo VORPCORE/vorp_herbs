@@ -15,6 +15,18 @@ local function contains(table, element)
 	return false
 end
 
+local function roundCoords(coords, decimal)
+	local multiplier = 10 ^ decimal
+	local x = math.floor(coords.x * multiplier + 0.5) / multiplier
+	local y = math.floor(coords.y * multiplier + 0.5) / multiplier
+	local z = math.floor(coords.z * multiplier + 0.5) / multiplier
+	return vec3(x, y, z)
+end
+
+local function isUsedNode(coords)
+	return contains(usedPoints, roundCoords(coords, 2))
+end
+
 local function GetArrayKey(array, value)
     for k,v in pairs(array) do
         if v == value then
@@ -42,7 +54,7 @@ end
 
 local function PlayerPick(destination)
 	if destination then
-		table.insert(usedPoints, destination.coords)
+		table.insert(usedPoints, roundCoords(destination.coords, 2))
 		local ped = PlayerPedId()
 		TaskTurnPedToFaceCoord(ped, destination.coords, -1)
 		Wait(2000)
@@ -77,7 +89,7 @@ local function PlayerPick(destination)
 end
 
 local function CreatePlant(destination)
-	if not DoesEntityExist(destination.plant) and not contains(usedPoints, destination.coords) then
+	if not DoesEntityExist(destination.plant) and not isUsedNode(destination.coords) then
 		local plantModel = joaat(destination.plantModel)
 		RequestModel(plantModel)
 		while not HasModelLoaded(plantModel) do
@@ -112,7 +124,7 @@ CreateThread(function()
 					end
 				end
 			end
-			while GetDistanceBetweenCoords(pedCoords, v.coords) <= Config.MinimumDistance and not isPicking and not contains(usedPoints, v.coords) do
+			while GetDistanceBetweenCoords(pedCoords, v.coords) <= Config.MinimumDistance and not isPicking and not isUsedNode(v.coords) do
 				Wait(1)
 				pedCoords = GetEntityCoords(ped)
 				GroupName = Config.Language.PromptGroupName .. " - " .. v.name
@@ -129,7 +141,7 @@ CreateThread(function()
 				print("test")
 			end
 
-			while GetDistanceBetweenCoords(pedCoords, v.coords) <= Config.MinimumDistance and not isPicking and contains(usedPoints, v.coords) do
+			while GetDistanceBetweenCoords(pedCoords, v.coords) <= Config.MinimumDistance and not isPicking and isUsedNode(v.coords) do
 				Wait(1)
 				pedCoords = GetEntityCoords(ped)
 				GroupName = Config.Language.PromptGroupName .. " - " .. v.name
@@ -158,7 +170,7 @@ CreateThread(function()
 				local model_hash = GetEntityModel(entity)
 				for k, v in ipairs(Config.Plants) do
 					local pedCoords = GetEntityCoords(PlayerPedId())
-					while Config.Plants[k].hash == model_hash and not contains(usedPoints, coords) and GetDistanceBetweenCoords(pedCoords, coords) < Config.MinimumDistance do
+					while Config.Plants[k].hash == model_hash and not isUsedNode(coords) and GetDistanceBetweenCoords(pedCoords, coords) < Config.MinimumDistance do
 						Wait(1)
 						pedCoords = GetEntityCoords(PlayerPedId())
 						GroupName = Config.Language.PromptGroupName .. " - " .. Config.Plants[k].name
@@ -187,7 +199,7 @@ CreateThread(function()
 							PlayerPick(fakeDestination)
 						end
 					end
-					while Config.Plants[k].hash == model_hash and contains(usedPoints, coords) and GetDistanceBetweenCoords(pedCoords, coords) < Config.MinimumDistance do
+					while Config.Plants[k].hash == model_hash and isUsedNode(coords) and GetDistanceBetweenCoords(pedCoords, coords) < Config.MinimumDistance do
 						Wait(1)
 						pedCoords = GetEntityCoords(PlayerPedId())
 						GroupName = Config.Language.PromptGroupName .. " - " .. Config.Plants[k].name
