@@ -69,24 +69,30 @@ local function PlayerPick(destination)
 		RemoveAnimDict(dict)
 		Wait(700)
 		ClearPedTasks(ped)
-		local rewardAmount = 1
-		if destination.minReward and destination.maxReward then
-			rewardAmount = GetRandomIntInRange(destination.minReward, destination.maxReward)
-		end
-		TriggerServerEvent("vorp_herbs:GiveReward", destination, rewardAmount)
-		isPicking = false
-		CreateThread(function()
-			if destination.timeout then
-				Wait(destination.timeout * 60000)
-			else
-				Wait(Config.Timeout * 60000)
+		if destination.reward then
+			local rewards = destination.reward
+			for _, item in ipairs(rewards) do
+				local rewardAmount = 1
+				if destination.minReward and destination.maxReward then
+					rewardAmount = GetRandomIntInRange(destination.minReward, destination.maxReward)
+				end
+				TriggerServerEvent("vorp_herbs:GiveReward", destination, item, rewardAmount)
 			end
-			table.remove(usedPoints, GetArrayKey(usedPoints, destination.coords))
-		end)
-	else
 
+			isPicking = false
+			CreateThread(function()
+				if destination.timeout then
+					Wait(destination.timeout * 60000)
+				else
+					Wait(Config.Timeout * 60000)
+				end
+				table.remove(usedPoints, GetArrayKey(usedPoints, destination.coords))
+			end)
+		end
 	end
 end
+
+
 
 local function CreatePlant(destination)
 	if not DoesEntityExist(destination.plant) and not isUsedNode(destination.coords) then
