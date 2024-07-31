@@ -1,8 +1,13 @@
+local VorpCore = exports.vorp_core:GetCore()
 local isPicking = false
 local Prompt
 local Group = GetRandomIntInRange(0, 0xffffff)
 local GroupName
 local usedPoints = {}
+local processedPlants = {}
+local plantCoords = nil
+
+
 
 local function contains(table, element)
 	if table ~= 0 then
@@ -28,11 +33,11 @@ local function isUsedNode(coords)
 end
 
 local function GetArrayKey(array, value)
-    for k,v in pairs(array) do
-        if v == value then
-            return k
-        end
-    end
+	for k, v in pairs(array) do
+		if v == value then
+			return k
+		end
+	end
 end
 
 local function CreateVarString(p0, p1, variadic)
@@ -69,30 +74,60 @@ local function PlayerPick(destination)
 		RemoveAnimDict(dict)
 		Wait(700)
 		ClearPedTasks(ped)
-		if destination.reward then
-			local rewards = destination.reward
-			for _, item in ipairs(rewards) do
-				local rewardAmount = 1
-				if destination.minReward and destination.maxReward then
-					rewardAmount = GetRandomIntInRange(destination.minReward, destination.maxReward)
-				end
-				TriggerServerEvent("vorp_herbs:GiveReward", destination, item, rewardAmount)
-			end
 
-			isPicking = false
-			CreateThread(function()
-				if destination.timeout then
-					Wait(destination.timeout * 60000)
-				else
-					Wait(Config.Timeout * 60000)
-				end
-				table.remove(usedPoints, GetArrayKey(usedPoints, destination.coords))
-			end)
-		end
+		TriggerServerEvent("vorp_herbs:GiveReward", destination)
 	end
 end
 
+local function formatItemsList(items)
+	local itemList = ""
+	for _, itemInfo in ipairs(items) do
+		if itemList ~= "" then
+			itemList = itemList .. ", "
+		end
+		itemList = itemList .. itemInfo.count .. " " .. itemInfo.name
+	end
+	return itemList
+end
 
+RegisterNetEvent("vorp_herbs:VerifyPickup")
+AddEventHandler("vorp_herbs:VerifyPickup", function(success, items, location)
+	local timeout = location.timeout or Config.Timeout
+	local coords = roundCoords(location.coords, 2)
+	local key = GetArrayKey(usedPoints, coords)
+	if success then
+		if timeout > 0 then
+			isPicking = false
+			VorpCore.NotifyRightTip(Config.Language.ItemsReceived .. formatItemsList(items), 4000)
+			CreateThread(function()
+				Wait(timeout * 60000)
+				local removeKey = GetArrayKey(usedPoints, coords)
+				if removeKey then
+					table.remove(usedPoints, removeKey)
+					processedPlants[coords] = nil
+				else
+					print(Config.Language.NoEntryFound)
+				end
+			end)
+		else
+			isPicking = false
+			if key then
+				table.remove(usedPoints, key)
+				processedPlants[coords] = nil
+			else
+				print(Config.Language.NoEntryFound)
+			end
+		end
+	else
+		isPicking = false
+		if key then
+			table.remove(usedPoints, key)
+		else
+			print(Config.Language.NoEntryFound)
+		end
+		processedPlants[coords] = nil
+	end
+end)
 
 local function CreatePlant(destination)
 	if not DoesEntityExist(destination.plant) and not isUsedNode(destination.coords) then
@@ -101,7 +136,8 @@ local function CreatePlant(destination)
 		while not HasModelLoaded(plantModel) do
 			Citizen.Wait(0)
 		end
-		local plantModelObject = CreateObject(plantModel, destination.coords.x, destination.coords.y, destination.coords.z, true, true, true)
+		local plantModelObject = CreateObject(plantModel, destination.coords.x, destination.coords.y,
+			destination.coords.z, true, true, true)
 		Wait(500)
 		Citizen.InvokeNative(0x9587913B9E772D29, plantModelObject, true)
 		SetEntityAsMissionEntity(plantModelObject, true, true)
@@ -110,19 +146,18 @@ local function CreatePlant(destination)
 end
 
 CreateThread(function()
-
 	CreatePickPrompt(Config.Language.PromptText, Config.ControlAction)
 
 	while true do
-
 		Wait(1000)
 
 		local ped = PlayerPedId()
 		local pedCoords = GetEntityCoords(ped)
 
 		for k, v in pairs(Config.Locations) do
-			if v.plantModel and GetDistanceBetweenCoords(pedCoords, v.coords) < 100 then
-				if not DoesEntityExist(v.plant) and Citizen.InvokeNative(0xDA8B2EAF29E872E2, v.coords) then
+			local roundedCoords = roundCoords(v.coords, 2)
+			if v.plantModel and GetDistanceBetweenCoords(pedCoords, roundedCoords) < 100 then
+				if not DoesEntityExist(v.plant) and Citizen.InvokeNative(0xDA8B2EAF29E872E2, roundedCoords) then
 					CreatePlant(v)
 					Wait(250)
 					if GetEntityHeightAboveGround(v.plant) > 0.0 then
@@ -130,7 +165,7 @@ CreateThread(function()
 					end
 				end
 			end
-			while GetDistanceBetweenCoords(pedCoords, v.coords) <= Config.MinimumDistance and not isPicking and not isUsedNode(v.coords) do
+			while GetDistanceBetweenCoords(pedCoords, roundedCoords) <= Config.MinimumDistance and not isPicking and not isUsedNode(roundedCoords) and not processedPlants[roundedCoords] and v.reward do
 				Wait(1)
 				pedCoords = GetEntityCoords(ped)
 				GroupName = Config.Language.PromptGroupName .. " - " .. v.name
@@ -139,15 +174,17 @@ CreateThread(function()
 				PromptSetEnabled(Prompt, true)
 				PromptSetVisible(Prompt, true)
 
-				if PromptHasHoldModeCompleted(Prompt) then
-					isPicking = true
-					PlayerPick(v)
+				if not processedPlants[roundedCoords] then
+					if PromptHasHoldModeCompleted(Prompt) then
+						isPicking = true
+						plantCoords = roundedCoords
+						PlayerPick(v)
+						processedPlants[plantCoords] = true
+					end
 				end
-
-				print("test")
 			end
 
-			while GetDistanceBetweenCoords(pedCoords, v.coords) <= Config.MinimumDistance and not isPicking and isUsedNode(v.coords) do
+			while GetDistanceBetweenCoords(pedCoords, roundedCoords) <= Config.MinimumDistance and not isPicking and isUsedNode(roundedCoords) do
 				Wait(1)
 				pedCoords = GetEntityCoords(ped)
 				GroupName = Config.Language.PromptGroupName .. " - " .. v.name
@@ -155,60 +192,79 @@ CreateThread(function()
 				PromptSetActiveGroupThisFrame(Group, GroupName)
 				PromptSetEnabled(Prompt, false)
 				PromptSetVisible(Prompt, Config.ShowUsedNodePrompt)
-
-				print("test")
 			end
 		end
-	end
-end)
 
-CreateThread(function()
-	while true do
-		Wait(1000)
 		local itemSet = CreateItemset(true)
-
-		local size = Citizen.InvokeNative(0x59B57C4B06531E1E, GetEntityCoords(PlayerPedId()), Config.MinimumDistance, itemSet, 3, Citizen.ResultAsInteger())
+		local size = Citizen.InvokeNative(0x59B57C4B06531E1E, GetEntityCoords(PlayerPedId()), Config.MinimumDistance,
+			itemSet, 3, Citizen.ResultAsInteger())
 
 		if size > 0 then
 			for index = 0, size do
 				local entity = GetIndexedItemInItemset(index, itemSet)
-				local coords = GetEntityCoords(entity)
+				local coords = roundCoords(GetEntityCoords(entity), 2)
 				local model_hash = GetEntityModel(entity)
-				for k, v in ipairs(Config.Plants) do
+
+				for k, plant in ipairs(Config.Plants) do
 					local pedCoords = GetEntityCoords(PlayerPedId())
-					while Config.Plants[k].hash == model_hash and not isUsedNode(coords) and GetDistanceBetweenCoords(pedCoords, coords) < Config.MinimumDistance do
+					while plant.hash == model_hash and not isUsedNode(coords) and GetDistanceBetweenCoords(pedCoords, coords) < Config.MinimumDistance and plant.reward do
 						Wait(1)
 						pedCoords = GetEntityCoords(PlayerPedId())
-						GroupName = Config.Language.PromptGroupName .. " - " .. Config.Plants[k].name
+						GroupName = Config.Language.PromptGroupName .. " - " .. plant.name
 						GroupName = CreateVarString(10, "LITERAL_STRING", GroupName)
 						PromptSetActiveGroupThisFrame(Group, GroupName)
 						PromptSetEnabled(Prompt, true)
 						PromptSetVisible(Prompt, true)
-						if PromptHasHoldModeCompleted(Prompt) then
-							isPicking = true
-							local fakeDestination
-							if Config.Plants[k].minReward and Config.Plants[k].maxReward then
-								fakeDestination = {
-									coords = coords,
-									minReward = Config.Plants[k].minReward,
-									maxReward = Config.Plants[k].maxReward,
-									reward = Config.Plants[k].reward,
-									name = Config.Plants[k].name
-								}
-							else
-								fakeDestination = {
-									coords = coords,
-									reward = Config.Plants[k].reward,
-									name = Config.Plants[k].name
-								}
+
+						local plantModelInLocations = false
+						local locationData = nil
+						for _, location in pairs(Config.Locations) do
+							if location.plantModel == plant.hash then
+								plantModelInLocations = true
+								locationData = location
+								break
 							end
-							PlayerPick(fakeDestination)
+						end
+
+						if plantModelInLocations and locationData then
+							-- Use the reward from location configuration
+							if not processedPlants[coords] then
+								if PromptHasHoldModeCompleted(Prompt) then
+									isPicking = true
+									local rewardData = {
+										coords = coords,
+										reward = locationData.reward,
+										name = locationData.name,
+										minReward = locationData.minReward or plant.minReward or 0,
+										maxReward = locationData.maxReward or plant.maxReward or 0
+									}
+									PlayerPick(rewardData)
+									processedPlants[coords] = true 
+								end
+							end
+						else
+							-- Use the plant-specific reward if not in locations
+							if not processedPlants[coords] and plant.reward then
+								if PromptHasHoldModeCompleted(Prompt) then
+									isPicking = true
+									local fakeDestination = {
+										coords = coords,
+										reward = plant.reward,
+										name = plant.name,
+										minReward = plant.minReward or 0,
+										maxReward = plant.maxReward or 0
+									}
+									PlayerPick(fakeDestination)
+									processedPlants[coords] = true 
+								end
+							end
 						end
 					end
-					while Config.Plants[k].hash == model_hash and isUsedNode(coords) and GetDistanceBetweenCoords(pedCoords, coords) < Config.MinimumDistance do
+
+					while plant.hash == model_hash and isUsedNode(coords) and GetDistanceBetweenCoords(pedCoords, coords) < Config.MinimumDistance do
 						Wait(1)
 						pedCoords = GetEntityCoords(PlayerPedId())
-						GroupName = Config.Language.PromptGroupName .. " - " .. Config.Plants[k].name
+						GroupName = Config.Language.PromptGroupName .. " - " .. plant.name
 						GroupName = CreateVarString(10, "LITERAL_STRING", GroupName)
 						PromptSetActiveGroupThisFrame(Group, GroupName)
 						PromptSetEnabled(Prompt, false)
@@ -217,6 +273,7 @@ CreateThread(function()
 				end
 			end
 		end
+
 		if IsItemsetValid(itemSet) then
 			DestroyItemset(itemSet)
 		end
