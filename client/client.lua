@@ -19,6 +19,8 @@ local function CreatePickPrompt(promptText, controlAction)
 end
 
 local function PlayerPick(destination, index, plantCoords, isProp)
+    UiPromptSetEnabled(Prompt, false)
+    UiPromptSetVisible(Prompt, false)
     isPicking = true
     VorpCore.Callback.TriggerAsync("vorp_herbs:CheckItemsCapacity", function(canCarryAll, looted)
         if canCarryAll then
@@ -42,8 +44,7 @@ local function PlayerPick(destination, index, plantCoords, isProp)
             VorpCore.NotifyRightTip(Config.Language.NoRoomForItems, 4000)
         end
         isPicking = false
-        UiPromptSetEnabled(Prompt, false)
-        UiPromptSetVisible(Prompt, false)
+
     end, destination, index, plantCoords, isProp)
 end
 
