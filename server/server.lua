@@ -29,17 +29,12 @@ VorpCore.Callback.Register("vorp_herbs:CheckItemsCapacity",
             local canCarryItem = exports.vorp_inventory:canCarryItem(_source, rewardItem, rewardAmount)
             if canCarryItem then
                 local iteminfo = exports.vorp_inventory:getItemDB(rewardItem, callback)
-                print(iteminfo)
-                print(iteminfo.label)
                 table.insert(itemsToGive, { name = rewardItem, count = rewardAmount, label = iteminfo.label })
             end
         end
 
         if #itemsToGive > 0 then
             for _, item in ipairs(itemsToGive) do
-
-
-                print(item.label)
                 exports.vorp_inventory:addItem(_source, item.name, item.count)
                 VorpCore.NotifyRightTip(_source, "You got " .. item.count .. "x " .. item.label, 4000)
             end
