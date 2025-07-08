@@ -2,21 +2,23 @@ local VorpCore = exports.vorp_core:GetCore()
 local CoordsLooted = {}
 local PropsLooted = {}
 
+local function coordsKey(coords)
+    return string.format("%.3f_%.3f_%.3f", coords.x, coords.y, coords.z)
+end
+
 VorpCore.Callback.Register("vorp_herbs:CheckItemsCapacity",
     function(source, callback, destination, key, plantCoords, isProp)
         local _source = source
         local itemsToGive = {}
-
 
         if not key then
             return callback(false)
         end
 
         if isProp then
-            for _, v in ipairs(PropsLooted) do
-                if v.x == plantCoords.x and v.y == plantCoords.y and v.z == plantCoords.z then
-                    return callback(false, true)
-                end
+            local propKey = coordsKey(plantCoords)
+            if PropsLooted[propKey] then
+                return callback(false, true)
             end
         else
             if CoordsLooted[key] then
@@ -40,14 +42,10 @@ VorpCore.Callback.Register("vorp_herbs:CheckItemsCapacity",
             end
             table.wipe(itemsToGive)
             if isProp then
-                table.insert(PropsLooted, plantCoords)
+                local propKey = coordsKey(plantCoords)
+                PropsLooted[propKey] = true
                 SetTimeout(destination.cooldown * 60000, function()
-                    for i, coords in ipairs(PropsLooted) do
-                        if coords.x == plantCoords.x and coords.y == plantCoords.y and coords.z == plantCoords.z then
-                            table.remove(PropsLooted, i)
-                            break
-                        end
-                    end
+                    PropsLooted[propKey] = nil
                 end)
             else
                 CoordsLooted[key] = true

@@ -1,1 +1,9 @@
+<1.1>
+- Fix issue with picking and prompts for base game and placed plants
+- Picking now tracks each plant/prop by its world coordinates, not just by name or config index
+- Added support for picking multiple instances of the same base game prop independently
+- Improved prompt logic to show at correct locations for all plant types
+- Placed props are now frozen and cannot be knocked over
+- Improved separation of logic for base game props, placed props, and location-only plants
+- Ensured prompts are only shown when player is within correct distance and not already picking
 <1.0>

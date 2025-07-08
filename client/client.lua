@@ -59,7 +59,8 @@ local function CreatePlant(destination, index)
     local plantModelObject = CreateObject(plantModel, destination.coords.x, destination.coords.y, destination.coords.z,
         false, false, false)
     repeat Wait(0) until DoesEntityExist(plantModelObject)
-    PlaceEntityOnGroundProperly(plantModelObject, true)
+    PlaceEntityOnGroundProperly(plantModelObject, false)
+    FreezeEntityPosition(plantModelObject, true)
     Config.Plants[index].plant = plantModelObject
 end
 
@@ -75,6 +76,7 @@ function GetClosestObject(coords, prophash)
             local objectCoords = GetEntityCoords(objects[i])
             local distance = #(objectCoords - coords)
             if closestDistance == -1 or closestDistance > distance then
+                closestDistance = distance
                 closestObject = objects[i]
             end
         end
@@ -96,7 +98,8 @@ CreateThread(function()
         if not IsEntityDead(ped) then
             for k, v in pairs(Config.Plants) do
                 local distance = getDist(pedCoords, v.coords)
-                if v.placeprop then
+
+                if v.placeprop and v.coords and v.plantModel then
                     if distance and distance <= 100 then
                         if not v.plant then
                             CreatePlant(v, k)
@@ -109,27 +112,22 @@ CreateThread(function()
                     end
                 end
 
-                if distance and distance <= Config.MinimumDistance and not isPicking then
+                if v.islocation and v.coords and distance and distance <= Config.MinimumDistance and not isPicking then
                     sleep = 0
-                    pedCoords = GetEntityCoords(ped)
-                    GroupName = Config.Language.PromptGroupName .. ": " .. v.name
+                    GroupName = Config.Language.PromptGroupName .. ": " .. (v.name or "Plant")
                     GroupName = VarString(10, "LITERAL_STRING", GroupName)
                     UiPromptSetActiveGroupThisFrame(Group, GroupName, 0, 0, 0, 0)
                     UiPromptSetEnabled(Prompt, true)
                     UiPromptSetVisible(Prompt, true)
-
                     if UiPromptHasHoldModeCompleted(Prompt) then
-                        isPicking = true
-                        PlayerPick(v, k, v.coords, false) -- location
+                        PlayerPick(v, k, v.coords, false)
                     end
                 end
             end
         end
-
         Wait(sleep)
     end
 end)
-
 
 CreateThread(function()
     repeat Wait(5000) until LocalPlayer.state.IsInSession
@@ -140,31 +138,26 @@ CreateThread(function()
         local pedCoords = GetEntityCoords(ped)
         if not IsEntityDead(ped) then
             for k, v in pairs(Config.Plants) do
-                if not v.placeprop and not v.islocation then
+                if not v.placeprop and not v.islocation and v.plantModel then
                     local plantModel = GetHashKey(v.plantModel)
                     local plantDetected = DoesObjectOfTypeExistAtCoords(pedCoords.x, pedCoords.y, pedCoords.z,
                         Config.MinimumDistance, plantModel, false)
                     if not isPicking and plantDetected == 1 then
-                        if not v.plantModel or v.plantModel == "" then
-                            print("must add the plant model for the look up in config")
-                        end
                         sleep = 0
-                        GroupName = Config.Language.PromptGroupName .. ": " .. v.name
+                        GroupName = Config.Language.PromptGroupName .. ": " .. (v.name or "Plant")
                         GroupName = VarString(10, "LITERAL_STRING", GroupName)
                         UiPromptSetActiveGroupThisFrame(Group, GroupName, 0, 0, 0, 0)
                         UiPromptSetEnabled(Prompt, true)
                         UiPromptSetVisible(Prompt, true)
-
                         if UiPromptHasHoldModeCompleted(Prompt) then
                             local plantEntity = GetClosestObject(pedCoords, plantModel)
                             if plantEntity then
                                 local plantCoords = GetEntityCoords(plantEntity)
-                                PlayerPick(v, k, plantCoords, true) -- prop
+                                PlayerPick(v, k, plantCoords, true) 
                             else
                                 print("No plant entity found nearby")
                             end
                         end
-
                         break
                     end
                 end
@@ -173,8 +166,6 @@ CreateThread(function()
         Wait(sleep)
     end
 end)
-
-
 AddEventHandler('onResourceStop', function(resourceName)
     if resourceName == 'vorp_herbs' then
         for _, v in pairs(Config.Plants) do
