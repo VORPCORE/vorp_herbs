@@ -1310,8 +1310,7 @@ Config.Language = {
     PromptGroupName = "Plants",
     NoRoomForItems = "No room in inventory for the items.",
     TooFarFromPlant = "You are too far from the plant location.",
-    cantpick = "This plant had been picked already comeback in a bit. ",
-    CantPickWhileRiding = "You cannot pick plants while riding."
+    cantpick = "This plant had been picked already comeback in a bit. "
 }
 
 -- Control actions for prompts
