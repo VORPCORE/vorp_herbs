@@ -15,6 +15,7 @@ local function CreatePickPrompt(promptText, controlAction)
     UiPromptSetVisible(Prompt, false)
     UiPromptSetHoldMode(Prompt, 1000)
     UiPromptSetGroup(Prompt, Group, 0)
+    UiPromptSetTransportMode(Prompt, 1)
     UiPromptRegisterEnd(Prompt)
 end
 
