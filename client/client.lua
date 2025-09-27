@@ -15,6 +15,7 @@ local function CreatePickPrompt(promptText, controlAction)
     UiPromptSetVisible(Prompt, false)
     UiPromptSetHoldMode(Prompt, 1000)
     UiPromptSetGroup(Prompt, Group, 0)
+    UiPromptSetTransportMode(Prompt, 1)
     UiPromptRegisterEnd(Prompt)
 end
 
@@ -62,58 +63,6 @@ local function CreatePlant(destination, index)
     PlaceEntityOnGroundProperly(plantModelObject, false)
     FreezeEntityPosition(plantModelObject, true)
     Config.Plants[index].plant = plantModelObject
-end
-
--- Function to check if the ped is in the vehicle/on the horse
-local RestrictedMounts = { -- https://raw.githubusercontent.com/femga/rdr3_discoveries/master/objects/object_list.lua
-    -- Buggy
-    `buggy01`,
-    `buggy02`,
-    `buggy03`,
-    -- Carts
-    `cart01`,
-    `cart02`,
-    `cart03`,
-    `cart04`,
-    `cart05`,
-    `cart06`,
-    `cart07`,
-    `cart08`,
-    -- Wagons / Coaches
-    `chuckwagon000x`,
-    `chuckwagon002x`,
-    `coach2`,
-    `coach3`,
-    `coach3_cutscene`,
-    `coach4`,
-    `coach5`,
-    `coach6`,
-    -- Canoes
-    `canoe`,
-    `canoe_tree_trunk`,
-    `pirogue2`,
-    `pirogue`,
-    -- you can add more models here
-}
-
-local function IsPedBusy(ped)
-    -- if on horseback
-    if IsPedOnMount(ped) then
-        return true
-    end
-
-    -- if in a cart/boat
-    local veh = GetVehiclePedIsUsing(ped)
-    if veh ~= 0 then
-        local model = GetEntityModel(veh)
-        for _, hash in ipairs(RestrictedMounts) do
-            if model == hash then
-                return true
-            end
-        end
-    end
-
-    return false
 end
 
 function GetClosestObject(coords, prophash)
@@ -172,11 +121,7 @@ CreateThread(function()
                     UiPromptSetEnabled(Prompt, true)
                     UiPromptSetVisible(Prompt, true)
                     if UiPromptHasHoldModeCompleted(Prompt) then
-                        if IsPedBusy(ped) then
-                            VorpCore.NotifyRightTip(Config.Language.CantPickWhileRiding, 4000)
-                        else
-                            PlayerPick(v, k, v.coords, false)
-                        end
+                        PlayerPick(v, k, v.coords, false)
                     end
                 end
             end
@@ -206,16 +151,12 @@ CreateThread(function()
                         UiPromptSetEnabled(Prompt, true)
                         UiPromptSetVisible(Prompt, true)
                         if UiPromptHasHoldModeCompleted(Prompt) then
-                            if IsPedBusy(ped) then
-                                VorpCore.NotifyRightTip(Config.Language.CantPickWhileRiding, 4000)
+                            local plantEntity = GetClosestObject(pedCoords, plantModel)
+                            if plantEntity then
+                                local plantCoords = GetEntityCoords(plantEntity)
+                                PlayerPick(v, k, plantCoords, true) 
                             else
-                                local plantEntity = GetClosestObject(pedCoords, plantModel)
-                                if plantEntity then
-                                    local plantCoords = GetEntityCoords(plantEntity)
-                                    PlayerPick(v, k, plantCoords, true) 
-                                else
-                                    print("No plant entity found nearby")
-                                end
+                                print("No plant entity found nearby")
                             end
                         end
                         break
