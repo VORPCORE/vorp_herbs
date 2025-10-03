@@ -1,3 +1,7 @@
+<1.2>
+- refactor + optimisation
+- security added to server side ensureing people cant send amounts
+- using vorp_lib (make sure you have it)
 <1.1>
 - Fix issue with picking and prompts for base game and placed plants
 - Picking now tracks each plant/prop by its world coordinates, not just by name or config index

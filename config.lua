@@ -1,33 +1,43 @@
-Config = {}
+---@class vorp_herbs_config
+local Config = {}
 
-Config.MinimumDistance = 1.0     -- Minimum distance required to enable prompts for digging and picking up reward item
+Config.Language = {
+    PromptText = "Pick",
+    PromptGroupName = "Plants",
+    NoRoomForItems = "No room in inventory for the items.",
+    TooFarFromPlant = "You are too far from the plant location.",
+    cantpick = "This plant had been picked already comeback in a bit. ",
+    noenoughspace = "You don't have enough space in your inventory",
+    yougot = "You got ",
+}
 
-Config.ShowUsedNodePrompt = true -- Show greyed out prompt on used nodes
+-- Control actions for prompts
+Config.ControlAction = 0x6D1319BE -- R key
 
 Config.Plants = {
-    {   -- location that can be base game spawned and still pick it                                  
-        plantModel = "rdr_bush_dry_thin_ba_sim",   -- Plant model as a string
-        name = "blueberry",                        -- Plant name to be displayed in prompt
-        reward = { "blueberry", "Blueberry_Seed" },-- Plant db reward itemreward = {"Blueberry_Seed","Blueberry"}, add more items to the table for multiple items to be given
-        minReward = 1,                             -- Minimum reward per plant (optional, defaults to 1!)
-        maxReward = 5,                             -- Maximum reward per plant (optional, defaults to 1!)
-        cooldown = 1,                              -- Cooldown for this plant (in minutes)
-        islocation = false,                        -- Is this a specific location?
-        placeprop = false,                         -- Should a prop be placed at the coordinates?
+    {                                               -- location that can be base game spawned and still pick it
+        plantModel = "rdr_bush_dry_thin_ba_sim",    -- Plant model as a string
+        name = "blueberry",                         -- Plant name to be displayed in prompt
+        reward = { "blueberry", "Blueberry_Seed" }, -- Plant db reward itemreward = {"Blueberry_Seed","Blueberry"}, add more items to the table for multiple items to be given
+        minReward = 1,                              -- Minimum reward per plant (optional, defaults to 1!)
+        maxReward = 5,                              -- Maximum reward per plant (optional, defaults to 1!)
+        cooldown = 1,                               -- Cooldown for this plant (in minutes)
+        islocation = false,                         -- Is this a specific location?
+        placeprop = false,                          -- Should a prop be placed at the coordinates?
         --coords = vector3(2046.34, -829.13, 42.96),-- Only set coords when islocation or placeprop is true
     },
-    {   -- location that sets prop
+    {                                               -- location that sets prop
         name = "blueberry",
-        plantModel = "rdr_bush_dry_thin_ba_sim",   -- Plant model to spawn
-        coords = vector3(2032.34, -818.2, 42.67), -- Coordinates for dirt mounds/reward item objects
-        reward = { "blueberry", "Blueberry_Seed" },-- Plant db reward itemreward = {"Blueberry_Seed","Blueberry"}, add more items to the table for multiple items to be given
+        plantModel = "rdr_bush_dry_thin_ba_sim",    -- Plant model to spawn
+        coords = vector3(2032.34, -818.2, 42.67),   -- Coordinates for dirt mounds/reward item objects
+        reward = { "blueberry", "Blueberry_Seed" }, -- Plant db reward itemreward = {"Blueberry_Seed","Blueberry"}, add more items to the table for multiple items to be given
         minReward = 1,
         maxReward = 5,
-        cooldown = 1,                              -- Cooldown for this plant (in minutes)
+        cooldown = 1, -- Cooldown for this plant (in minutes)
         islocation = true,
         placeprop = true,
     },
-    {   -- location only no setting prop
+    { -- location only no setting prop
         name = "Apple Tree",
         --plantModel = "rdr_bush_dry_thin_ba_sim", -- Plant model to spawn
         reward = { "apple" },
@@ -38,7 +48,7 @@ Config.Plants = {
         islocation = true,
         placeprop = false,
     },
-    {   -- base game spawnable plant
+    { -- base game spawnable plant
         plantModel = "s_indiantobacco01x",
         name = "Indian Tobbaco",
         reward = { "Indian_Tobbaco" },
@@ -1304,14 +1314,6 @@ Config.Plants = {
 }
 
 
--- Language text for prompts
-Config.Language = {
-    PromptText = "Pick",
-    PromptGroupName = "Plants",
-    NoRoomForItems = "No room in inventory for the items.",
-    TooFarFromPlant = "You are too far from the plant location.",
-    cantpick = "This plant had been picked already comeback in a bit. "
+return {
+    Config = Config
 }
-
--- Control actions for prompts
-Config.ControlAction = 0x6D1319BE -- R key

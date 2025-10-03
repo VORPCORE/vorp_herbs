@@ -3,6 +3,8 @@
 ### Requirements
 
 * vorp core
+* vorp_lib
+
 ---
 A plant picking and spawning system for RedM/Vorp.
 
@@ -16,5 +18,6 @@ Pretty straightforward. Config is documented for your ease.
 ### Credits
 
 Author: [Snapopotamus]()
+Refactored by: [Outsider]()
 
 Based on code from vorp_mining, vorp_lumber, and hails_herbs. All due credit to the authors of those scripts!
