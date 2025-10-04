@@ -8,14 +8,14 @@ local function coordsKey(coords)
     return string.format("%.3f_%.3f_%.3f", coords.x, coords.y, coords.z)
 end
 
-Core.Callback.Register("vorp_herbs:CheckItemsCapacity", function(source, callback, destination, key, plantCoords, isProp)
+Core.Callback.Register("vorp_herbs:CheckItemsCapacity", function(source, callback, key, plantCoords, isProp)
     local _source = source
     local itemsToGive <const> = {}
 
-    if not key then
+    local value <const> = Config.Plants[key]
+    if not value then
         return callback(false)
     end
-    local value <const> = Config.Plants[destination]
 
     if isProp then
         local propKey <const> = coordsKey(plantCoords)

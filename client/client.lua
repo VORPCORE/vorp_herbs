@@ -1,12 +1,12 @@
-local Lib <const> = Import({ "/config", "entities", "prompts" })
-local Config <const> = Lib.Config --[[@as vorp_herbs_config]]
+local LIB <const> = Import({ "/config", "entities", "prompts" })
+local Config <const> = LIB.Config --[[@as vorp_herbs_config]]
 local Core <const> = exports.vorp_core:GetCore()
-local Entity <const> = Lib.Entity   ---[[@as ENTITIES]]
-local Prompts <const> = Lib.Prompts ---[[@as PROMPTS]]
+local Object <const> = LIB.Object   ---[[@as ENTITIES]]
+local Prompts <const> = LIB.Prompts ---[[@as PROMPTS]]
 local isPicking = false
 local PLAYER_IS_DEAD = false
 
-local function PlayerPick(destination, index, plantCoords, isProp)
+local function PlayerPick(index, plantCoords, isProp)
     if not isPicking then
         isPicking = true
         Core.Callback.TriggerAsync("vorp_herbs:CheckItemsCapacity", function(canCarryAll, looted)
@@ -30,12 +30,12 @@ local function PlayerPick(destination, index, plantCoords, isProp)
             end
             Wait(1000)
             isPicking = false
-        end, destination, index, plantCoords, isProp)
+        end, index, plantCoords, isProp)
     end
 end
 
 local function createPlant(v)
-    return Entity.Object:Create({
+    return Object:Create({
         Model = v.plantModel,
         Pos = v.coords,
         Options = { PlaceOnGround = true },
@@ -49,7 +49,7 @@ local function createPrompt(v, index, isProp, coords)
         sleep = 700,
     }, function()
         if not isPicking then
-            PlayerPick(v, index, coords, isProp)
+            PlayerPick(index, coords, isProp)
         end
     end, true)
 end
