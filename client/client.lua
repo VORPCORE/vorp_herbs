@@ -70,7 +70,7 @@ CreateThread(function()
             local ped <const> = PlayerPedId()
             local pedCoords <const> = GetEntityCoords(ped)
             for k, v in ipairs(Config.Plants) do
-                if v.placeprop and v.coords and v.plantModel and v.islocation then
+                if v.placeprop and v.coords and v.plantModel and not v.islocation then
                     local distance <const> = #(pedCoords - v.coords)
                     if distance and distance <= 100 then
                         if not v.plant then
@@ -103,7 +103,7 @@ CreateThread(function()
             local pedCoords <const> = GetEntityCoords(ped)
 
             for k, v in ipairs(Config.Plants) do
-                if not v.placeprop and not v.islocation and v.plantModel then
+                if not v.placeprop and v.islocation and v.plantModel then
                     local plantModel <const> = GetHashKey(v.plantModel)
                     local plantEntity = 0
                     local plantDetected <const> = DoesObjectOfTypeExistAtCoords(pedCoords.x, pedCoords.y, pedCoords.z, 2.0, plantModel, false)
