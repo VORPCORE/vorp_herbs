@@ -54,12 +54,7 @@ local function createPrompt(v, index, isProp, coords)
     end, true)
 end
 
-local function destroy(v)
-    v.plant:Delete()
-    v.prompt:Destroy()
-end
-
-
+-- creates models or uses just location
 CreateThread(function()
     repeat Wait(5000) until LocalPlayer.state.IsInSession
 
@@ -70,18 +65,25 @@ CreateThread(function()
             local ped <const> = PlayerPedId()
             local pedCoords <const> = GetEntityCoords(ped)
             for k, v in ipairs(Config.Plants) do
-                if v.placeprop and v.coords and v.plantModel and not v.islocation then
+                -- is location for prop or no prop spawn
+                if v.coords and v.islocation then
                     local distance <const> = #(pedCoords - v.coords)
                     if distance and distance <= 100 then
-                        if not v.plant then
+                        if not v.plant and v.placeprop and v.plantModel then
                             v.plant = createPlant(v)
+                        end
+
+                        if not v.prompt then
                             v.prompt = createPrompt(v, k, false, v.coords)
                         end
                     else
-                        if v.plant and v.prompt then
-                            destroy(v)
-                            v.prompt = nil
+                        if v.plant then
+                            v.plant:Delete()
                             v.plant = nil
+                        end
+                        if v.prompt then
+                            v.prompt:Destroy()
+                            v.prompt = nil
                         end
                     end
                 end
@@ -103,7 +105,8 @@ CreateThread(function()
             local pedCoords <const> = GetEntityCoords(ped)
 
             for k, v in ipairs(Config.Plants) do
-                if not v.placeprop and v.islocation and v.plantModel then
+                -- only for finding world props
+                if not v.placeprop and not v.islocation and v.plantModel then
                     local plantModel <const> = GetHashKey(v.plantModel)
                     local plantEntity = 0
                     local plantDetected <const> = DoesObjectOfTypeExistAtCoords(pedCoords.x, pedCoords.y, pedCoords.z, 2.0, plantModel, false)
