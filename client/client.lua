@@ -34,6 +34,22 @@ local function PlayerPick(index, plantCoords, isProp)
     end
 end
 
+local function getObject(plantModel)
+    local gamePool <const> = GetGamePool("CObject")
+    local plantEntity = 0
+    local distance = math.huge
+    for _, object in ipairs(gamePool) do
+        if GetEntityModel(object) == plantModel then
+            local objectDistance <const> = #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(object))
+            if objectDistance < distance then
+                distance = objectDistance
+                plantEntity = object
+            end
+        end
+    end
+    return plantEntity
+end
+
 local function createPlant(v)
     return Object:Create({
         Model = v.plantModel,
@@ -113,6 +129,11 @@ CreateThread(function()
                     if not isPicking and plantDetected == 1 then
                         if not v.prompt1 then
                             plantEntity = GetClosestObjectOfType(pedCoords.x, pedCoords.y, pedCoords.z, 2.5, plantModel, false, false, false)
+                            -- if plantEntity is 0, get the object from the game pool the native is failing to get this object somehow
+                            if plantEntity == 0 then
+                                plantEntity = getObject(plantModel)
+                            end
+
                             if plantEntity > 0 and DoesEntityExist(plantEntity) then
                                 local plantCoords <const> = GetEntityCoords(plantEntity)
                                 v.prompt1 = createPrompt(v, k, true, plantCoords)
