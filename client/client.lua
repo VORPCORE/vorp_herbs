@@ -11,7 +11,7 @@ local function PlayerPick(index, plantCoords, isProp)
         isPicking = true
         Core.Callback.TriggerAsync("vorp_herbs:CheckItemsCapacity", function(canCarryAll, looted)
             if canCarryAll then
-                local ped <const> = PlayerPedId()
+                local ped <const> = CACHE.Ped
                 TaskTurnPedToFaceCoord(ped, plantCoords.x, plantCoords.y, plantCoords.z, -1)
                 Wait(2000)
                 ClearPedTasks(ped)
@@ -40,7 +40,7 @@ local function getObject(plantModel)
     local distance = math.huge
     for _, object in ipairs(gamePool) do
         if GetEntityModel(object) == plantModel then
-            local objectDistance <const> = #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(object))
+            local objectDistance <const> = #(GetEntityCoords(CACHE.Ped) - GetEntityCoords(object))
             if objectDistance < distance then
                 distance = objectDistance
                 plantEntity = object
@@ -78,7 +78,7 @@ CreateThread(function()
         local sleep = 1000
 
         if not PLAYER_IS_DEAD then
-            local ped <const> = PlayerPedId()
+            local ped <const> = CACHE.Ped
             local pedCoords <const> = GetEntityCoords(ped)
             for k, v in ipairs(Config.Plants) do
                 -- is location for prop or no prop spawn
@@ -117,7 +117,7 @@ CreateThread(function()
         local sleep = 1000
 
         if not PLAYER_IS_DEAD then
-            local ped <const> = PlayerPedId()
+            local ped <const> = CACHE.Ped
             local pedCoords <const> = GetEntityCoords(ped)
 
             for k, v in ipairs(Config.Plants) do
